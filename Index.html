@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NoFlix - Assistir Filmes, Séries, Futebol e TV Online Grátis</title>
+    <meta name="title" content="NoFlix - Assistir Filmes, Séries, Futebol e TV Online Grátis">
+    <meta name="description" content="No NoFlix você assiste os melhores filmes, séries, jogos de futebol ao vivo e canais de TV online grátis em HD. O melhor do entretenimento está aqui.">
+    <meta name="keywords" content="assistir filmes online, ver séries online, futebol ao vivo, tv online grátis, noflix, streaming hd">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="shortcut icon" href="favicon.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        :root {
+            --bg-dark: #020617;
+            --accent: #dc2626;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .carousel-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 0.75rem;
+            padding: 0.5rem 0 1.5rem 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-snap-type: x mandatory;
+        }
+        .carousel-container::-webkit-scrollbar {
+            display: none;
+        }
+        .carousel-container > div {
+            scroll-snap-align: start;
+        }
+        .drawer {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+        .drawer-open {
+            transform: translateX(0);
+        }
+        .drawer-closed {
+            transform: translateX(-100%);
+        }
+        .overlay {
+            transition: opacity 0.3s ease-in-out;
+            z-index: 90;
+        }
+        .details-hero {
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            background-size: cover;
+            background-position: center;
+        }
+        .details-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, var(--bg-dark) 5%, rgba(2, 6, 23, 0.4) 50%, rgba(2, 6, 23, 0.8) 100%);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .line-clamp-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        @media (max-width: 640px) {
+            .movie-card:not(.flex-none) {
+                width: 100%;
+            }
+            .card-title-overlay {
+                background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, transparent 100%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay -->
+    <div id="overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden" onclick="toggleDrawer()"></div>
+
+    <!-- Drawer Menu -->
+    <div id="drawer" class="fixed top-0 left-0 h-full w-72 bg-slate-950 border-r border-slate-800 drawer-closed p-8 shadow-2xl">
+        <div class="flex justify-between items-center mb-10">
+            <span class="text-red-600 text-2xl font-black tracking-tighter">MENU</span>
+            <button onclick="toggleDrawer()" class="text-white hover:rotate-90 transition-transform">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <nav class="flex flex-col gap-2">
+            <a href="/" class="text-gray-400 hover:text-white hover:bg-slate-900 flex items-center gap-4 p-3 rounded-xl transition-all font-bold">
+                <i class="fas fa-home w-6 text-red-600"></i> Início
+            </a>
+            <a href="explore.php?type=filmes" class="text-gray-400 hover:text-white hover:bg-slate-900 flex items-center gap-4 p-3 rounded-xl transition-all font-bold">
+                <i class="fas fa-film w-6 text-red-600"></i> Filmes
+            </a>
+            <a href="explore.php?type=series&mode=categoria&cat=Novelas" class="text-gray-400 hover:text-white hover:bg-slate-900 flex items-center gap-4 p-3 rounded-xl transition-all font-bold">
+                <i class="fas fa-heart w-6 text-red-600"></i> Novelas
+            </a>
+            <a href="explore.php?type=series&mode=categoria&cat=Doramas" class="text-gray-400
