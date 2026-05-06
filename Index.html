@@ -8,114 +8,226 @@
     <meta name="title" content="NoFlix - Assistir Filmes, Séries, Futebol e TV Online Grátis">
     <meta name="description" content="No NoFlix você assiste os melhores filmes, séries, jogos de futebol ao vivo e canais de TV online grátis em HD. O melhor do entretenimento está aqui.">
     <meta name="keywords" content="assistir filmes online, ver séries online, futebol ao vivo, tv online grátis, noflix, streaming hd">
-    <link rel="icon" href="favicon.png" type="image/png">
-    <link rel="shortcut icon" href="favicon.png" type="image/png">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="shortcut icon" href="/favicon.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        :root {
-            --bg-dark: #020617;
-            --accent: #dc2626;
-        }
-        body {
-            background-color: var(--bg-dark);
-            color: #f8fafc;
-            overflow-x: hidden;
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .carousel-container {
-            display: flex;
-            overflow-x: auto;
-            gap: 0.75rem;
-            padding: 0.5rem 0 1.5rem 0;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            scroll-snap-type: x mandatory;
-        }
-        .carousel-container::-webkit-scrollbar {
-            display: none;
-        }
-        .carousel-container > div {
-            scroll-snap-align: start;
-        }
-        .drawer {
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100;
-        }
-        .drawer-open {
-            transform: translateX(0);
-        }
-        .drawer-closed {
-            transform: translateX(-100%);
-        }
-        .overlay {
-            transition: opacity 0.3s ease-in-out;
-            z-index: 90;
-        }
-        .details-hero {
-            position: relative;
-            display: flex;
-            align-items: flex-end;
-            background-size: cover;
-            background-position: center;
-        }
-        .details-hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, var(--bg-dark) 5%, rgba(2, 6, 23, 0.4) 50%, rgba(2, 6, 23, 0.8) 100%);
-        }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .line-clamp-1 {
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        @media (max-width: 640px) {
-            .movie-card:not(.flex-none) {
-                width: 100%;
-            }
-            .card-title-overlay {
-                background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, transparent 100%);
-            }
-        }
+        :root { --bg-dark: #020617; --accent: #dc2626; }
+        body { background-color: var(--bg-dark); color: #f8fafc; overflow-x: hidden; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .carousel-container { display: flex; overflow-x: auto; gap: 0.75rem; padding: 0.5rem 0 1.5rem 0; scrollbar-width: none; -ms-overflow-style: none; scroll-snap-type: x mandatory; }
+        .carousel-container::-webkit-scrollbar { display: none; }
+        .carousel-container > div { scroll-snap-align: start; }
+        #drawer { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 100; }
+        .drawer-open { transform: translateX(0); }
+        .drawer-closed { transform: translateX(-100%); }
+        #overlay { transition: opacity 0.3s ease-in-out; z-index: 90; }
+        .details-hero { position: relative; display: flex; align-items: flex-end; background-size: cover; background-position: center; }
+        .details-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg-dark) 5%, rgba(2, 6, 23, 0.4) 50%, rgba(2, 6, 23, 0.8) 100%); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        @media (max-width: 640px) { .movie-card:not(.flex-none) { width: 100%; } }
+        .card-title-overlay { background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, transparent 100%); }
+        #tv-player { width: 100%; height: 60vh; max-height: 500px; background: #000; border-radius: 12px; }
+        .channel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+        .channel-item { background: rgba(31,41,55,0.8); border-radius: 12px; overflow: hidden; transition: all 0.3s; }
+        .channel-item:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
     <!-- Overlay -->
     <div id="overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden" onclick="toggleDrawer()"></div>
-
+    
     <!-- Drawer Menu -->
     <div id="drawer" class="fixed top-0 left-0 h-full w-72 bg-slate-950 border-r border-slate-800 drawer-closed p-8 shadow-2xl">
         <div class="flex justify-between items-center mb-10">
             <span class="text-red-600 text-2xl font-black tracking-tighter">MENU</span>
-            <button onclick="toggleDrawer()" class="text-white hover:rotate-90 transition-transform">
-                <i class="fas fa-times text-xl"></i>
-            </button>
+            <button onclick="toggleDrawer()" class="text-white hover:rotate-90 transition-transform"><i class="fas fa-times text-xl"></i></button>
         </div>
         <nav class="flex flex-col gap-2">
-            <a href="/" class="text-gray-400 hover:text-white hover:bg-slate-900 flex items-center gap-4 p-3 rounded-xl transition-all font-bold">
-                <i class="fas fa-home w-6 text-red-600"></i> Início
-            </a>
-            <a href="explore.php?type=filmes" class="text-gray-400 hover:text-white hover:bg-slate-900 flex items-center gap-4 p-3 rounded-xl transition-all font-bold">
-                <i class="fas fa-film w-6 text-red-600"></i> Filmes
-            </a>
-            <a href="explore.php?type=series&mode=categoria&cat=Novelas" class="text-gray-400 hover:text-white hover:bg-slate-900 flex items-center gap-4 p-3 rounded-xl transition-all font-bold">
-                <i class="fas fa-heart w-6 text-red-600"></i> Novelas
-            </a>
-            <a href="explore.php?type=series&mode=categoria&cat=Doramas" class="text-gray-400
+            <a href="/" class="text-gray-400 hover:text-white hover:bg-slate-900 flex items-center gap-4 p-3 rounded-xl transition-all font-bold"><i class="fas fa-home w-6 text-red-600"></i> Início</a>
+            <a href="#canais" onclick="loadChannels(); toggleDrawer()" class="text-gray-400 hover:text-white hover:bg-slate-900 flex items-center gap-4 p-3 rounded-xl transition-all font-bold"><i class="fas fa-tv w-6 text-red-600"></i> Canais TV</a>
+            <a href="favoritos.php" class="text-gray-400 hover:text-white hover:bg-slate-900 flex items-center gap-4 p-3 rounded-xl transition-all font-bold"><i class="fas fa-bookmark w-6 text-red-600"></i> Meus Favoritos</a>
+        </nav>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="bg-slate-950/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 md:h-20">
+                <div class="flex items-center gap-3 md:gap-6">
+                    <button onclick="toggleDrawer()" class="text-white text-xl md:text-2xl hover:text-red-600 transition-colors"><i class="fas fa-bars"></i></button>
+                    <a href="/" class="flex-shrink-0">
+                        <span class="text-red-600 text-xl md:text-3xl font-black tracking-tighter">No<span class="text-white">Flix</span></span>
+                    </a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="loadChannels()" class="text-red-600 hover:text-red-400 text-lg"><i class="fas fa-sync-alt"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+        <!-- Player TV -->
+        <section id="player-section" class="mb-12 hidden">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-5xl font-black text-white mb-4 tracking-tighter">📺 TV AO VIVO</h1>
+                <button onclick="closePlayer()" class="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-full font-bold uppercase tracking-wider transition-all">← Voltar Canais</button>
+            </div>
+            <div class="bg-slate-900 rounded-2xl p-6 shadow-2xl">
+                <video id="tv-player" class="w-full rounded-xl" controls playsinline webkit-playsinline></video>
+                <div id="player-error" class="text-center text-red-400 mt-4 hidden">Canal temporariamente indisponível</div>
+            </div>
+        </section>
+
+        <!-- Lista de Canais do Dropbox -->
+        <section id="canais-section">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl md:text-4xl font-black text-white border-l-4 border-red-600 pl-6 uppercase tracking-wider">📡 Canais TV (Dropbox)</h2>
+                <button onclick="loadChannels()" class="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-full font-bold uppercase tracking-wider transition-all flex items-center gap-2">
+                    <i class="fas fa-sync-alt animate-spin hidden" id="loading-spin"></i>
+                    Atualizar Lista
+                </button>
+            </div>
+            <div id="channels-loading" class="text-center py-12">
+                <i class="fas fa-tv text-6xl text-gray-500 mb-4"></i>
+                <p class="text-xl text-gray-400">Carregando canais do Dropbox...</p>
+            </div>
+            <div id="channels-container" class="channel-grid hidden"></div>
+        </section>
+    </main>
+
+    <script>
+        // Função para carregar lista do Dropbox
+        async function loadChannels() {
+            try {
+                document.getElementById('loading-spin').classList.remove('hidden');
+                document.getElementById('channels-loading').style.display = 'block';
+                document.getElementById('channels-container').classList.add('hidden');
+                
+                const response = await fetch('https://dl.dropbox.com/scl/fi/eejtn3vqwjpvw0iwmb52j/tv.txt?rlkey=jcnbloi8ddfezbp5ksoaypzhd&st=6k23hpyo&dl=1');
+                const text = await response.text();
+                const lines = text.split('
+').filter(line => line.trim() && isValidStream(line.trim()));
+                
+                displayChannels(lines);
+            } catch (error) {
+                console.error('Erro ao carregar Dropbox:', error);
+                document.getElementById('channels-loading').innerHTML = '<p class="text-xl text-red-400">Erro ao carregar lista do Dropbox. <button onclick="loadChannels()" class="underline">Tentar novamente</button></p>';
+            } finally {
+                document.getElementById('loading-spin').classList.add('hidden');
+            }
+        }
+
+        // Validar stream válido (M3U8, MP4, etc.)
+        function isValidStream(url) {
+            return url.match(/.(m3u8|mp4|ts|mkv|avi)$/i) || 
+                   url.includes('m3u8') || 
+                   url.includes('live') || 
+                   url.includes('stream');
+        }
+
+        // Exibir canais
+        function displayChannels(channels) {
+            const container = document.getElementById('channels-container');
+            container.innerHTML = '';
+            
+            channels.slice(0, 50).forEach((url, index) => {
+                const channel = document.createElement('div');
+                channel.className = 'channel-item cursor-pointer';
+                channel.onclick = () => playChannel(url);
+                channel.innerHTML = `
+                    <div class="aspect-video bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+                        <i class="fas fa-play-circle text-4xl text-red-500"></i>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-sm line-clamp-2 mb-2" title="${url.split('/').pop()}">Canal ${index + 1}</h3>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <i class="fas fa-hd text-red-500"></i>
+                            <span>HD Live</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(channel);
+            });
+            
+            document.getElementById('channels-loading').style.display = 'none';
+            container.classList.remove('hidden');
+        }
+
+        // Player HLS.js
+        let hls;
+        function playChannel(url) {
+            const video = document.getElementById('tv-player');
+            const playerSection = document.getElementById('player-section');
+            const channelsSection = document.getElementById('canais-section');
+            
+            channelsSection.style.display = 'none';
+            playerSection.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+            
+            if (Hls.isSupported()) {
+                if (hls) hls.destroy();
+                hls = new Hls({
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    backBufferLength: 90
+                });
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.play();
+            }
+            
+            video.onerror = () => {
+                document.getElementById('player-error').classList.remove('hidden');
+            };
+        }
+
+        // Fechar player
+        function closePlayer() {
+            const video = document.getElementById('tv-player');
+            const playerSection = document.getElementById('player-section');
+            const channelsSection = document.getElementById('canais-section');
+            
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
+            video.pause();
+            video.src = '';
+            playerSection.classList.add('hidden');
+            channelsSection.style.display = 'block';
+            document.body.classList.remove('overflow-hidden');
+            document.getElementById('player-error').classList.add('hidden');
+        }
+
+        // Menu toggle
+        function toggleDrawer() {
+            const drawer = document.getElementById('drawer');
+            const overlay = document.getElementById('overlay');
+            if (drawer.classList.contains('drawer-closed')) {
+                drawer.classList.remove('drawer-closed');
+                drawer.classList.add('drawer-open');
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                drawer.classList.remove('drawer-open');
+                drawer.classList.add('drawer-closed');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Carregar canais ao abrir página
+        window.addEventListener('load', loadChannels);
+    </script>
+</body>
+</html>
